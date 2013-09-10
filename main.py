@@ -1,8 +1,3 @@
-#need for this
-#	qt4
-
-
-
 import sys
 from PyQt4.Qt import *
 from PyQt4 import QtCore
@@ -14,25 +9,28 @@ from AI import MyAI
 class MainWindow(QMainWindow):
 
     def __init__(self, *args):
-        
+
         QMainWindow.__init__(self, *args)
         self.setGeometry(QRect(0, 0, 400, 200))
-        
-        #making window transparent       
+
+        #making window transparent
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.setStyleSheet("background-color: rgb(255, 255, 255)")
         self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint)
- 
+
         self.statusbar = self.statusBar()
         self.statusbar.showMessage('Move this window up to the game screen, and select "start" in the capture menu')
- 
+
         self.menubar = self.menuBar()
 
-    	self.filemenu = self.menubar.addMenu('&File')
+        self.filemenu = self.menubar.addMenu('&File')
         self.capturemenu = self.menubar.addMenu('&Capture')
-        
+
         entry = self.capturemenu.addAction("Start")
         self.connect(entry,QtCore.SIGNAL('triggered()'), self.doCapture)
+
+        entry = self.capturemenu.addAction("Toogle image diff")
+        self.connect(entry,QtCore.SIGNAL('triggered()'), self.doToogleDiff)
 
         entry = self.filemenu.addAction("Exit")
         self.connect(entry,QtCore.SIGNAL('triggered()'), self.doExit)
@@ -47,6 +45,8 @@ class MainWindow(QMainWindow):
         #TODO:
         #self.ai.set_contoller(self.controller)
 
+    def doToogleDiff(self):
+        self.ai.toogle_diff_show();
     def capture_frame(self,data):
         callback = data[0]
         rect = data[1]
@@ -55,32 +55,32 @@ class MainWindow(QMainWindow):
         callback(pmap);
 
     def doCapture(self):
-    	win_rect = self.geometry()
-    	
-    	x = win_rect.x()
-    	y = win_rect.y()
-    	w = win_rect.width()
-    	h = win_rect.height()
+        win_rect = self.geometry()
 
-    	win_rect = self.menubar.geometry()
+        x = win_rect.x()
+        y = win_rect.y()
+        w = win_rect.width()
+        h = win_rect.height()
 
-    	y = y + win_rect.height()
-    	h = h - win_rect.height()
+        win_rect = self.menubar.geometry()
 
-    	win_rect = self.statusbar.geometry()
+        y = y + win_rect.height()
+        h = h - win_rect.height()
 
-    	h = h - win_rect.height()
+        win_rect = self.statusbar.geometry()
 
-    	time.sleep(0.2)
-        
+        h = h - win_rect.height()
+
+        time.sleep(0.2)
+
         self.capturer.start_capture(QRect(x,y,w,h))
         self.ai.start_ai()
-    
+
     def doExit(self):
-   		exit(0)
+        exit(0)
 
 class App(QApplication):
-    
+
     def __init__(self, *args):
         QApplication.__init__(self, *args)
         self.main = MainWindow()

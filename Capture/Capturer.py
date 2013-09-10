@@ -4,7 +4,6 @@ from PyQt4.Qt import *
 from PyQt4 import QtCore
 import time
 class Capturer(QtCore.QThread):
-	
 	def __init__(self):
 		QtCore.QThread.__init__(self)
 		self.lock = threading.Lock()
@@ -14,20 +13,20 @@ class Capturer(QtCore.QThread):
 		self.lock.acquire()
 		self.frame = frame
 		self.lock.release()
-	
+
 	def run(self):
 		while(True):
 			#asking main window for screenshot, becouse of QT (grab screen must be called from same thread as GUI)
 			self.emit(SIGNAL("needscreen"),[self.set_frame, self.rect])
-			#time.sleep(0.1)
+			time.sleep(0.01)
 
- 	def __del__(self):
-  		self.wait()
-		
+	def __del__(self):
+		self.wait()
+
 	def start_capture(self, rect):
 		self.rect = rect
 		self.start()
-	
+
 	def stop_capture(self):
 		pass
 
