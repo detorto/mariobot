@@ -1,4 +1,4 @@
-import sys, time
+import sys
 
 PLATFORM = sys.platform
 
