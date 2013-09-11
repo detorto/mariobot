@@ -12,7 +12,7 @@ class KeyboardLayout:
         if PLATFORM == "win32":
             return {self.Action.ACTION_JUMP:0x20, 
                         self.Action.ACTION_RIGHT_RUN:0x27,
-                        sefl.Action.ACTION_RIGHT_RUN:0x25 }
+                        self.Action.ACTION_RIGHT_RUN:0x25 }
         else:
             return {self.Action.ACTION_JUMP:0x20, 
                         self.Action.ACTION_RIGHT_RUN:0x27,
