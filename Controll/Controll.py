@@ -1,5 +1,4 @@
-import sys, time
-
+import sys
 class controll:
     send_message = 0
     os_version = 0
