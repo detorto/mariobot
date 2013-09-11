@@ -7,16 +7,19 @@ class KeyboardLayout:
         ACTION_JUMP = "jump"
         ACTION_LEFT_RUN = "left"
         ACTION_RIGHT_RUN = "right"
-
+        ACTION_SHOOT = "shoot"
+        
     def get_default_key_map(self):
         if PLATFORM == "win32":
             return {self.Action.ACTION_JUMP:0x20, 
                         self.Action.ACTION_RIGHT_RUN:0x27,
-                        self.Action.ACTION_RIGHT_RUN:0x25 }
+                        self.Action.ACTION_RIGHT_RUN:0x25,
+                        self.Action.ACTION_SHOOT:0x0D}
         else:
             return {self.Action.ACTION_JUMP:0x20, 
                         self.Action.ACTION_RIGHT_RUN:0x27,
-                        self.Action.ACTION_RIGHT_RUN:0x25 }
+                        self.Action.ACTION_RIGHT_RUN:0x25,
+                        self.Action.ACTION_SHOOT:0x0D}
 
 if PLATFORM == "win32":
     import win32api, win32con
@@ -47,4 +50,7 @@ class Controller:
     
     def rigth_run(self):
         self.send_message(self.keymap[KeyboardLayout.Action.ACTION_RIGHT_RUN])
+        
+    def shoot(self):
+        self.send_message(self.keymap[KeyboardLayout.Action.ACTION_SHOOT])
        
