@@ -5,21 +5,23 @@ import time
 
 from Capture import Capturer
 from AI import MyAI
+from Controll import Controller
 
 class MainWindow(QMainWindow):
 
     def __init__(self, *args):
 
         QMainWindow.__init__(self, *args)
-        self.setGeometry(QRect(0, 0, 400, 200))
-
+        self.setGeometry(QRect(0, 0, 300, 300))
+        self.list = QListWidget(self)
+        self.list.setGeometry(QRect(0, 20, 300, 260))
         #making window transparent
-        self.setAttribute(Qt.WA_TranslucentBackground)
-        self.setStyleSheet("background-color: rgb(255, 255, 255)")
-        self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint)
+        #self.setAttribute(Qt.WA_TranslucentBackground)
+        #self.setStyleSheet("background-color: rgb(255, 255, 255)")
+        #self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint)
 
         self.statusbar = self.statusBar()
-        self.statusbar.showMessage('Move this window up to the game screen, and select "start" in the capture menu')
+        #self.statusbar.showMessage('Move this window up to the game screen, and select "start" in the capture menu')
 
         self.menubar = self.menuBar()
 
@@ -36,45 +38,28 @@ class MainWindow(QMainWindow):
         self.connect(entry,QtCore.SIGNAL('triggered()'), self.doExit)
 
         self.capturer = Capturer()
+        self.list.addItem("Capturer initialized!")
+        
+        self.controller = Controller()
+        self.list.addItem("Contoller initialized!")
+        
         self.ai = MyAI()
-        #TODO:
-        #self.controller = Controller()
+        self.list.addItem("AI initialized!")
 
         self.ai.set_capturer(self.capturer)
-        self.connect(self.capturer,QtCore.SIGNAL('needscreen'), self.capture_frame)
-        #TODO:
-        #self.ai.set_contoller(self.controller)
+        self.ai.set_controller(self.controller)
+
+        self.connect(self.capturer,QtCore.SIGNAL('can_run_ai'),self.ai.start_ai);
+        
+        ##s
 
     def doToogleDiff(self):
         self.ai.toogle_diff_show();
-    def capture_frame(self,data):
-        callback = data[0]
-        rect = data[1]
-
-        pmap = QPixmap.grabWindow(QApplication.desktop().winId(),rect.x(),rect.y(),rect.width(),rect.height()).toImage().rgbSwapped();
-        callback(pmap);
 
     def doCapture(self):
-        win_rect = self.geometry()
-
-        x = win_rect.x()
-        y = win_rect.y()
-        w = win_rect.width()
-        h = win_rect.height()
-
-        win_rect = self.menubar.geometry()
-
-        y = y + win_rect.height()
-        h = h - win_rect.height()
-
-        win_rect = self.statusbar.geometry()
-
-        h = h - win_rect.height()
-
-        time.sleep(0.2)
-
-        self.capturer.start_capture(QRect(x,y,w,h))
-        self.ai.start_ai()
+        
+        self.capturer.start_capture()
+        
 
     def doExit(self):
         exit(0)

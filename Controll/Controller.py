@@ -1,5 +1,7 @@
 import sys
 
+
+
 PLATFORM = sys.platform
 
 class KeyboardLayout:
@@ -11,24 +13,27 @@ class KeyboardLayout:
         
     def get_default_key_map(self):
         if PLATFORM == "win32":
-            return {self.Action.ACTION_JUMP:0x20, 
+            return {    self.Action.ACTION_JUMP:0x20, 
                         self.Action.ACTION_RIGHT_RUN:0x27,
                         self.Action.ACTION_RIGHT_RUN:0x25,
                         self.Action.ACTION_SHOOT:0x0D}
         else:
-            return {self.Action.ACTION_JUMP:0x20, 
-                        self.Action.ACTION_RIGHT_RUN:0x27,
-                        self.Action.ACTION_RIGHT_RUN:0x25,
-                        self.Action.ACTION_SHOOT:0x0D}
+            import uinput
+            return {    self.Action.ACTION_JUMP : uinput.KEY_UP, 
+                        self.Action.ACTION_RIGHT_RUN : uinput.KEY_RIGHT,
+                        self.Action.ACTION_RIGHT_RUN : uinput.KEY_LEFT,
+                        self.Action.ACTION_SHOOT : uinput.KEY_SPACE}
 
 if PLATFORM == "win32":
-    import win32api, win32con
-    def windows_keyboard_event(event):
+    import win32api
+    def windows_keyboard_event(key, state = 0):
         win32api.keybd_event(event,0x0001,0);
 else:
-    import pyatspi
-    def linux_keyboard_event(event):
-        print "lin keyboard event %s" % event;
+    import uinput
+    def linux_keyboard_event(key, state = 1):
+        device = uinput.Device(KeyboardLayout().get_default_key_map().values())
+        device.emit_click(key)
+        
 
 def getKeyboardEventFunc():
     if PLATFORM == "win32":

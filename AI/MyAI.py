@@ -5,8 +5,9 @@ from PyQt4 import QtCore
 import time
 import pygame
 import sys
-import PIL
-from PIL import Image, ImageChops
+#import PIL
+#from PIL 
+import Image, ImageChops
 class MyAI(QtCore.QThread):
 
     def __init__(self):
@@ -16,7 +17,7 @@ class MyAI(QtCore.QThread):
 
     def init_test_screen(self):
         pygame.init()
-        self.size = (self.capturer.rect.width(),self.capturer.rect.height())
+        self.size = (self.capturer.get_rect().width(),self.capturer.get_rect().height())
         self.winscreen = pygame.display.set_mode(self.size)
 
     def process_test_screen(self):
@@ -24,8 +25,6 @@ class MyAI(QtCore.QThread):
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT: sys.exit()
-
-
             #self.winscreen.fill(0)
         self.winscreen.blit(surf,(0,0))
         pygame.display.flip()
@@ -33,8 +32,8 @@ class MyAI(QtCore.QThread):
     def set_capturer(self, capturer):
         self.capturer = capturer
 
-    def set_controler(self, controller):
-        pass
+    def set_controller(self, controller):
+        self.controller = controller
 
     def start_ai(self):
         self.start()
@@ -43,6 +42,8 @@ class MyAI(QtCore.QThread):
         pass
     def toogle_diff_show(self):
         self.diff_show = not self.diff_show;
+        self.controller.jump();
+
     def do_analize(self):
         #here must be conwersion of image and calls to analise it.
         #image is QImage instanse, with inverted RGB.
@@ -52,7 +53,9 @@ class MyAI(QtCore.QThread):
 
         self.init_test_screen()
 
+
         while(True):
+
             self.frame = self.capturer.get_last_frame_bytestring()
 
             newimg = Image.fromstring("RGBA", self.size, self.frame);

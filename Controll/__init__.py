@@ -1,2 +1,2 @@
-__all__ = ["Controll"]
-from .Controll import Controll
+__all__ = ["Controller"]
+from .Controller import Controller
