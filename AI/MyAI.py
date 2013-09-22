@@ -14,14 +14,17 @@ class MyAI(QtCore.QThread):
         QtCore.QThread.__init__(self)
         self.lock = threading.Lock();
         self.diff_show = False;
-
+    def log(self,string):
+        self.emit(SIGNAL("log"),string)
+    
     def init_test_screen(self):
         pygame.init()
         self.size = (self.capturer.get_rect().width(),self.capturer.get_rect().height())
         self.winscreen = pygame.display.set_mode(self.size)
+        self.log("Diag screen inited (%d, %d)" % self.size)
 
     def process_test_screen(self):
-        surf = pygame.image.frombuffer(self.frame,self.size,"RGBX")
+        surf = pygame.image.frombuffer(self.frame,self.size,"RGB")
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT: sys.exit()
@@ -40,10 +43,11 @@ class MyAI(QtCore.QThread):
 
     def stop_ai(self):
         pass
+
     def toogle_diff_show(self):
         self.diff_show = not self.diff_show;
-        self.controller.jump();
-
+        self.log("Diff show toogled, state %s"%self.diff_show)
+        
     def do_analize(self):
         #here must be conwersion of image and calls to analise it.
         #image is QImage instanse, with inverted RGB.
@@ -55,10 +59,14 @@ class MyAI(QtCore.QThread):
 
 
         while(True):
-
+            t1 = time.time()
+ 
             self.frame = self.capturer.get_last_frame_bytestring()
 
-            newimg = Image.fromstring("RGBA", self.size, self.frame);
+            if not self.frame:
+                continue;
+
+            newimg = Image.fromstring("RGB", self.size, self.frame);
             if  hasattr(self,'prewimg'):
                 img = ImageChops.difference(newimg, self.prewimg)
                 if self.diff_show:
@@ -68,3 +76,6 @@ class MyAI(QtCore.QThread):
             self.do_analize()
 
             self.process_test_screen()
+             # block of code to time here
+            t2 = time.time()
+           # print "Code took %s seconds." %(str(t2-t1))
