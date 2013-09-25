@@ -1,7 +1,5 @@
 import sys
 
-
-
 PLATFORM = sys.platform
 
 class KeyboardLayout:
@@ -35,7 +33,7 @@ else:
         device.emit_click(key)
         
 
-def getKeyboardEventFunc():
+def get_keyboard_event_func():
     if PLATFORM == "win32":
         return windows_keyboard_event;
     else:
@@ -44,7 +42,7 @@ def getKeyboardEventFunc():
 class Controller:
 
     def __init__(self):
-        self.send_message = getKeyboardEventFunc()
+        self.send_message = get_keyboard_event_func()
         self.keymap = KeyboardLayout().get_default_key_map();
 
     def jump(self):

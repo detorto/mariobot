@@ -91,8 +91,6 @@ class CapturerWindow(QDialog):
         self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint)
         
     def closeEvent(self, event):
-        
-        
         win_rect = self.geometry()
 
         x = win_rect.x()
@@ -102,7 +100,7 @@ class CapturerWindow(QDialog):
 
         self.rect = QRect(x,y,w,h);   
 
-class Capturer(QObject):
+class StreamCapturer(QObject):
 
     def __init__(self):        
         QObject.__init__(self)

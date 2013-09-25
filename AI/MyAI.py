@@ -23,8 +23,8 @@ class MyAI(QtCore.QThread):
         self.winscreen = pygame.display.set_mode(self.size)
         self.log("Diag screen inited (%d, %d)" % self.size)
 
-    def process_test_screen(self):
-        surf = pygame.image.frombuffer(self.frame,self.size,"RGB")
+    def process_diag_screen(self):
+        surf = pygame.image.frombuffer(self.diag_frame,self.size,"RGB")
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT: sys.exit()
@@ -48,34 +48,47 @@ class MyAI(QtCore.QThread):
         self.diff_show = not self.diff_show;
         self.log("Diff show toogled, state %s"%self.diff_show)
         
+
+
+    def run(self):
+        self.init_test_screen()
+
+        while(True):
+            self.current_frame = self.capturer.get_last_frame_bytestring()
+
+            if not self.current_frame:
+                continue;
+
+            self.do_analize()
+
+            self.diag_frame = Image.fromstring("RGB", self.size, self.current_frame);
+            
+            if self.diff_show:
+                self.diag_frame  = ImageChops.difference(Image.fromstring("RGB", self.size, self.current_frame),  
+                                                        Image.fromstring("RGB", self.size, self.prew_frame))
+            
+            #do somthing with diag_image
+            self.diag_frame = self.diag_frame.tostring();
+            
+            self.prew_frame=self.current_frame;
+            self.process_diag_screen()
+
     def do_analize(self):
         #here must be conwersion of image and calls to analise it.
         #image is QImage instanse, with inverted RGB.
         pass
 
-    def run(self):
+    def detect_player(self, frame):
+        self.current_frame = frame;
+        #here must be player detection
+        return QRect(30,20,30+50,20+50)
+    
+    def player_correct(self,correctRect):
+        #this called in training mode, 
+        #correctRect are the rea coordinates on current frame
+        pass
 
-        self.init_test_screen()
+    def save_state(self):
+        #in training mode, save trained state to file
+        pass
 
-
-        while(True):
-            t1 = time.time()
- 
-            self.frame = self.capturer.get_last_frame_bytestring()
-
-            if not self.frame:
-                continue;
-
-            newimg = Image.fromstring("RGB", self.size, self.frame);
-            if  hasattr(self,'prewimg'):
-                img = ImageChops.difference(newimg, self.prewimg)
-                if self.diff_show:
-                    self.frame = img.tostring()
-
-            self.prewimg = newimg
-            self.do_analize()
-
-            self.process_test_screen()
-             # block of code to time here
-            t2 = time.time()
-           # print "Code took %s seconds." %(str(t2-t1))

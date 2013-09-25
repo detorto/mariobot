@@ -1,3 +1,4 @@
-__all__ = ["Capturer"]
+__all__ = ["StreamCapturer","FileCapturer"]
 
-from .Capturer import Capturer
+from .StreamCapturer import StreamCapturer
+from .FileCapturer import FileCapturer
