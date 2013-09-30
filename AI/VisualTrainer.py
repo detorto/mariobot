@@ -61,7 +61,7 @@ class VisualTrainer(QtCore.QThread):
             pygame.display.set_caption("Images processed: %d"%(saved_count))
             frame = self.raw_capturer.get_last_frame_bytestring()
             if self.process_ai:
-                ai_answer = self.ai.analize_state({"current_frame":frame})
+                ai_answer = self.ai.analize_state({"current_frame_pil":pil_image(frame,self.raw_size)})
 
                 try:
                     ai_answer["info"]["player_rect"];

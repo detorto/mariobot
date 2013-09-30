@@ -17,6 +17,7 @@ class AIManager(QtCore.QThread):
         self.diff_show = False;
         self.current_frame = None;
         self.prev_frame = None;
+        self.working = True
 
     def log(self,string):
         self.emit(SIGNAL("log"),string)
@@ -31,7 +32,7 @@ class AIManager(QtCore.QThread):
         surf = pygame.image.frombuffer(self.diag_frame,self.size,"RGB")
 
         for event in pygame.event.get():
-            if event.type == pygame.QUIT: self.terminate()
+            if event.type == pygame.QUIT: self.working = False;
 
         self.winscreen.blit(surf,(0,0))
         pygame.display.flip()
@@ -55,14 +56,14 @@ class AIManager(QtCore.QThread):
     def run(self):
         self.init_test_screen()
 
-        while(True):
+        while(self.working):
             self.current_frame = self.capturer.get_last_frame_bytestring()
 
             if not self.current_frame:
                 continue;
 
-            self.do_analize()
-            self.do_actions();
+            #self.do_analize()
+            #self.do_actions();
 
             self.diag_frame = Image.fromstring("RGB", self.size, self.current_frame);
 
@@ -77,8 +78,10 @@ class AIManager(QtCore.QThread):
 
             self.process_diag_screen()
 
+        pygame.display.quit()
+
     def do_analize(self):
-        state = {"curren_frame":self.current_frame}
+        state = {"current_frame_pil":Image.fromstring("RGB", self.size, self.current_frame)}
 
         self.ai_answer = self.ai.analize_state(state)
 

@@ -77,10 +77,12 @@ class MainWindow(QMainWindow):
         self.connect(self.manager,QtCore.SIGNAL('log'), self.log)
         self.connect(self.ai,QtCore.SIGNAL('log'), self.log)
         self.connect(self.capturer,QtCore.SIGNAL('log'), self.log)
+
     def doToogleAIInfo(self):
         if self.trainer:
             self.trainer.toogle_ai_info();
         self.manager.toogle_ai_info();
+
     def doTraining(self):
 
         self.trainer = VisualTrainer()
