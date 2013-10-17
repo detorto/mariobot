@@ -18,9 +18,19 @@ class AIManager(QtCore.QThread):
         self.current_frame = None;
         self.prev_frame = None;
         self.working = True
+        self.ai_process = True
 
     def log(self,string):
         self.emit(SIGNAL("log"),string)
+
+    def draw_rect(self,surf,rect,tpe):
+        if tpe == "POS":
+            color = (0,255,0)
+        if tpe == "NEG":
+            color = (255,0,0)
+        if tpe == "AI":
+            color = (255,255,255)
+        pygame.draw.rect(surf,color,rect,1)
 
     def init_test_screen(self):
         pygame.init()
@@ -29,11 +39,22 @@ class AIManager(QtCore.QThread):
         self.log("Diag screen inited (%d, %d)" % self.size)
 
     def process_diag_screen(self):
-        surf = pygame.image.frombuffer(self.diag_frame,self.size,"RGB")
+        fr = pygame.image.frombuffer(self.diag_frame,self.size,"RGB")
+        print self.ai_answer
+        try:
+            fr = pygame.image.frombuffer(self.ai_answer["info"]["diag"].tostring(),self.size,"RGB")
+        except:
+            pass
+
+        surf = fr;
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT: self.working = False;
-
+        try:
+            self.draw_rect(surf, self.ai_answer["info"]["player_rect"][0] , "POS")
+            self.draw_rect(surf, self.ai_answer["info"]["player_rect"][1] , "NEG")
+        except:
+            pass
         self.winscreen.blit(surf,(0,0))
         pygame.display.flip()
 
@@ -51,7 +72,7 @@ class AIManager(QtCore.QThread):
         self.log("Diff show toogled, state %s"%self.diff_show)
 
     def toogle_ai_info(self):
-        pass
+        self.ai_process = not self.ai_process
 
     def run(self):
         self.init_test_screen()
@@ -62,8 +83,10 @@ class AIManager(QtCore.QThread):
             if not self.current_frame:
                 continue;
 
-            #self.do_analize()
-            #self.do_actions();
+            if self.ai_process:
+                self.do_analize()
+                self.do_actions()
+
 
             self.diag_frame = Image.fromstring("RGB", self.size, self.current_frame);
 

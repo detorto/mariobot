@@ -7,7 +7,6 @@ from Capture import StreamCapturer
 from Capture import FileCapturer
 from AI import MyAI
 from AI import VisualTrainer
-from Controll import Controller
 from AI import AIManager
 from AI.NeuralNets import PlayerDetectionNet
 
@@ -61,8 +60,8 @@ class MainWindow(QMainWindow):
 
         self.log("Capturer initialized!")
 
-        self.controller = Controller()
-        self.log("Contoller initialized!")
+       # self.controller = Controller()
+       # self.log("Contoller initialized!")
 
         #here!
         self.ai = MyAI(player_detection_netclass =  PlayerDetectionNet )
@@ -72,7 +71,7 @@ class MainWindow(QMainWindow):
 
         self.manager.set_ai(self.ai)
         self.manager.set_capturer(self.capturer)
-        self.manager.set_controller(self.controller)
+        #self.manager.set_controller(self.controller)
 
         self.connect(self.manager,QtCore.SIGNAL('log'), self.log)
         self.connect(self.ai,QtCore.SIGNAL('log'), self.log)

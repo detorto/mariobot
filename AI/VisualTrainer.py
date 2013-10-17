@@ -6,14 +6,9 @@ import copy
 import Image
 import time
 
-from Utils import pil_image
+from Utils import pil_image, crop_rect
 
 from pybrain.datasets import SupervisedDataSet
-
-
-
-def crop_rect(xy,wh):
-    return xy+(xy[0]+wh[0],xy[1]+wh[1])
 
 class VisualTrainer(QtCore.QThread):
     def __init__(self):
@@ -42,6 +37,8 @@ class VisualTrainer(QtCore.QThread):
             color = (255,0,0)
         if tpe == "AI":
             color = (255,255,255)
+        if tpe == "AI2":
+            color = (128,255,128)
         pygame.draw.rect(surf,color,rect,1)
 
     def toogle_ai_info(self):
@@ -112,7 +109,8 @@ class VisualTrainer(QtCore.QThread):
                     self.draw_rect(surf, position["POS"]+self.net_input_size, "POS")
 
                 try:
-                    self.draw_rect(surf,   ai_answer["info"]["player_rect"] , "AI")
+                    self.draw_rect(surf,   ai_answer["info"]["player_rect"][0] , "AI")
+                    self.draw_rect(surf,   ai_answer["info"]["player_rect"][1] , "AI2")
                 except:
                     pass
 
@@ -137,6 +135,12 @@ class VisualTrainer(QtCore.QThread):
 
             saved_count += 1
             self.log("Images processed: %d"%(saved_count))
+            if self.process_ai:
+                self.log("Generating dataset....")
+                dataset = self.generate_dataset();
+                self.log("Training....")
+                self.log("Error on last train is: %f"%(self.net.train_on_dataset(dataset)))
+                self.log("Done training!")
 
         pygame.display.quit()
         self.log("Generating dataset....")
@@ -165,20 +169,33 @@ class VisualTrainer(QtCore.QThread):
         pos_image = self.positive_capturer.get_last_frame_pil();
         neg_image = self.negative_capturer.get_last_frame_pil();
 
+
         neg_count = self.negative_capturer.get_count()
         pos_count = self.positive_capturer.get_count()
 
         self.log("There is %d positive images and"%(pos_count))
         self.log("%d negative images."%(neg_count))
         self.log("Generating %d sets!"%(min(neg_count, pos_count)))
-        dataset = SupervisedDataSet(self.net.input_image_size()[0]*self.net.input_image_size()[1]*3, 1)
+        dataset = SupervisedDataSet(self.net.input_image_size()[0]*self.net.input_image_size()[1]*3, 2)
 
         while pos_image and neg_image:
-            arr1 = [ord(x) for x in (list(pos_image.tostring()))]
-            dataset.addSample(arr1, (1,))
+            #pos_image.show()
+           # neg_image.show()
+            #arr1 = [ord(x) for x in (list(pos_image.tostring()))]
+            (r,g,b) = pos_image.split()
+            r = r.tostring()
+            g = g.tostring()
+            b = b.tostring()
+            #arr =
+            dataset.addSample([ord(x) for x in list(r)]+[ord(x) for x in list(g)]+[ord(x) for x in list(b)], (1,0))
 
-            arr2 = [ord(x) for x in (list(neg_image.tostring()))]
-            dataset.addSample(arr1, (0,))
+            #arr2 = [ord(x) for x in (list(neg_image.tostring()))]
+            (r,g,b) = neg_image.split()
+            r = r.tostring()
+            g = g.tostring()
+            b = b.tostring()
+
+            dataset.addSample([ord(x) for x in list(r)]+[ord(x) for x in list(g)]+[ord(x) for x in list(b)], (0,1))
 
             pos_image = self.positive_capturer.get_last_frame_pil();
             neg_image = self.negative_capturer.get_last_frame_pil();
