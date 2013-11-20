@@ -1,6 +1,7 @@
 import copy
 import time
 import sys
+import numpy
 #import PIL
 #from PIL
 import ImageChops
@@ -14,6 +15,9 @@ from NeuralNets import PlayerDetectionNet
 
 from Utils import pil_image, crop_rect
 
+def pil2cv(pilframe):
+    open_cv_image = numpy.array(pilframe)
+    return open_cv_image[:, :, ::-1].copy()
 class MyAI(QObject):
 
     player_detected = False;
@@ -23,45 +27,58 @@ class MyAI(QObject):
         self.player_detection_net = player_detection_netclass()
         self.analize_proc = self.state_select_proc
 
-        self.frames = {"left_run": None, "right_run": None, "jump":None}
+        self.frames = {"left_run": [], "right_run": [], "jump":None}
         self.iters = 0
 
     def player_detection_proc(self,frame):
 
-      if self.iters % 3 == 0:
+      self.r = None
+      if self.iters == 0:
         Controller.rigth_run();
-        print "RR"
-        self.frames["jump"] = frame;
 
-      elif self.iters % 3 == 1:
-        Controller.left_run();
-        print "LR"
-        self.frames["right_run"] = frame;
-      else:
-        #Controller.jump();
-        print "JP"
-        self.frames["left_run"] = frame;
+      if self.iters == 1:
+          Controller.rigth_run();
+          self.frames["right_run"].append(frame);
+
+      if self.iters == 2:
+          Controller.left_run();
+          self.frames["right_run"].append(frame);
+
+      if self.iters == 3:
+          Controller.left_run();
+          self.frames["left_run"].append(frame);
+
+      if self.iters == 4:
+          self.frames["left_run"].append(frame);
 
       self.iters+=1
+      time.sleep(0.1)
 
-      if not self.frames["left_run"] or not self.frames["right_run"] or not self.frames["jump"]:
-        return
+      if not self.frames["left_run"] or not self.frames["right_run"]:
+        return {"anus":2}
 
-      self.diff1  = ImageChops.difference(self.frames["left_run"],self.frames["right_run"])
-      r = (0,0,0,0)
-      r =  self.player_detection_net.find_player_template(self.diff1)
-      self.player_detected = True;
-      self.analize_proc = self.state_select_proc
+      if not self.player_detected and self.iters > 4:
+        self.r =  self.player_detection_net.find_player_template( self.frames["left_run"], self.frames["right_run"] )
 
-      return {"player_rect":[r],"diag":self.diff1}
+      if self.r:
+           self.player_detected = True;
+           self.player_detection_net.show_t();
+
+           self.analize_proc = self.state_select_proc
+      print "returning pr: ",self.r
+      return {"player_rect":[self.r]}
 
     def main_proc(self,frame):
+      Controller.rigth_run();
+
       r = self.player_detection_net.detect_player(frame)
-      return {"player_rect":r}
-
-
+      if not r:
+        Controller.jump()
+      print "returning pr2: ",r
+      return {"player_rect":[r,]}
 
     def state_select_proc(self,frame):
+      print self.player_detected
       if not self.player_detected:
         self.analize_proc = self.player_detection_proc;
         return self.analize_proc(frame)
@@ -79,12 +96,12 @@ class MyAI(QObject):
        if not frame:
            print "No frame on input!"
            return None
-       print "frame got"
+      # print "frame got"
        r = None
-       try:
-          r = self.analize_proc(frame)
-       except:
-          pass
+       #try:
+       r = self.analize_proc(frame)
+       #except:
+        #  pass
 
        return {"info":r}
        #except:

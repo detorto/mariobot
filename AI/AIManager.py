@@ -9,6 +9,23 @@ import sys
 #from PIL
 import Image, ImageChops
 
+import cv2
+import numpy as np
+import numpy
+import itertools
+
+def pil2cv(pilframe):
+    open_cv_image = numpy.array(pilframe)
+    try:
+        return open_cv_image[:, :, ::-1].copy()
+    except:
+           return open_cv_image[:, :].copy()
+
+
+def cv2pil(cvframe):
+    #cv2_im = cv2.cvtColor(cvframe,cv2.COLOR_BGR2RGB)
+    return Image.fromarray(cvframe)
+
 class AIManager(QtCore.QThread):
 
     def __init__(self):
@@ -40,7 +57,7 @@ class AIManager(QtCore.QThread):
 
     def process_diag_screen(self):
         fr = pygame.image.frombuffer(self.diag_frame,self.size,"RGB")
-        print self.ai_answer
+       # print self.ai_answer
         try:
             fr = pygame.image.frombuffer(self.ai_answer["info"]["diag"].tostring(),self.size,"RGB")
         except:
@@ -55,6 +72,16 @@ class AIManager(QtCore.QThread):
             self.draw_rect(surf, self.ai_answer["info"]["player_rect"][1] , "NEG")
         except:
             pass
+
+        #if self.ai.player_detection_net.new_pts != None:
+         #   for p in self.ai.player_detection_net.new_pts:
+          #      pygame.draw.circle(surf,(255,0,255),tuple(p),4);
+
+        #if self.ai.player_detection_net.bb:
+         #   pygame.draw.rect(surf,(255,0,255),self.ai.player_detection_net.bb,2)
+
+
+
         self.winscreen.blit(surf,(0,0))
         pygame.display.flip()
 
@@ -75,6 +102,7 @@ class AIManager(QtCore.QThread):
         self.ai_process = not self.ai_process
 
     def run(self):
+        time.sleep(5)
         self.init_test_screen()
 
         while(self.working):
@@ -91,8 +119,12 @@ class AIManager(QtCore.QThread):
             self.diag_frame = Image.fromstring("RGB", self.size, self.current_frame);
 
             if self.diff_show:
-                self.diag_frame  = ImageChops.difference(Image.fromstring("RGB", self.size, self.current_frame),
-                                                        Image.fromstring("RGB", self.size, self.prev_frame))
+                #self.diag_frame  = ImageChops.difference(Image.fromstring("RGB", self.size, self.current_frame),
+                cvimg = pil2cv(self.diag_frame)
+                cvimg = cv2.cvtColor(cvimg,cv2.COLOR_BGR2GRAY)
+                cvimg = cvimg - cv2.erode(cvimg,None)
+                cvimg = cv2.cvtColor(cvimg,cv2.COLOR_GRAY2BGR)
+                self.diag_frame = cv2pil(cvimg)                        #Image.fromstring("RGB", self.size, self.prev_frame))
 
             #do somthing with diag_image
             self.diag_frame = self.diag_frame.tostring();

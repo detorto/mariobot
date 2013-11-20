@@ -10,6 +10,12 @@ from Utils import pil_image, crop_rect
 
 from pybrain.datasets import SupervisedDataSet
 
+
+import cv2
+import numpy
+import numpy as np
+import itertools
+
 class VisualTrainer(QtCore.QThread):
     def __init__(self):
         QtCore.QThread.__init__(self)
@@ -75,8 +81,8 @@ class VisualTrainer(QtCore.QThread):
             skipped = False
             mx,my = 0,0
 
-            while not selected["NEG"]:
-
+            while True:#not selected["NEG"]:
+                frame = self.raw_capturer.get_last_frame_bytestring()
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         training = False

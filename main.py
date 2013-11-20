@@ -88,7 +88,7 @@ class MainWindow(QMainWindow):
 
         self.trainer.set_ai(self.ai)
 
-        self.trainer.set_raw_capturer(FileCapturer("./train_sets/raw_images/"))
+        self.trainer.set_raw_capturer(self.capturer)
 
         self.trainer.set_positive_dataset_capturer(FileCapturer("./train_sets/pos_data/"));
         self.trainer.set_negative_dataset_capturer(FileCapturer("./train_sets/neg_data/"));
